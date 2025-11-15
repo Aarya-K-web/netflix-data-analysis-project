@@ -3,60 +3,76 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.set_page_config(page_title="Netflix Dashboard", layout="wide")
+# ---- Streamlit Page Config ----
+st.set_page_config(page_title="Netflix Dashboard", page_icon="🎬", layout="wide")
 
-# ------------------ Load Data ------------------
+# ---- Load Data ----
 @st.cache_data
 def load_data():
-    df = pd.read_csv("netflix_titles.csv")  # rename if needed
+    df = pd.read_csv("mymoviedb.csv")   # <-- Your correct dataset name
     return df
 
 df = load_data()
 
-# ------------------ Sidebar ------------------
+# ---- Sidebar Navigation ----
 st.sidebar.title("🎬 Netflix Dashboard")
 st.sidebar.write("Interactive analysis of Netflix movies & TV shows.")
+st.sidebar.markdown("---")
 
-menu = st.sidebar.radio("Go to:", ["Overview", "Country Analysis", "Genres", "Release Trends"])
+menu = st.sidebar.radio(
+    "Go to section:",
+    ["Overview", "Country Analysis", "Genres", "Release Trends"]
+)
 
-# ------------------ Dashboard Pages ------------------
+# ---- Dashboard Pages ----
 
-# Overview
+# 1. Overview
 if menu == "Overview":
     st.title("🎬 Netflix Data Overview")
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Titles", len(df))
-    col2.metric("Movies", df[df["type"]=="Movie"].shape[0])
-    col3.metric("TV Shows", df[df["type"]=="TV Show"].shape[0])
+    col2.metric("Movies", df[df["type"] == "Movie"].shape[0])
+    col3.metric("TV Shows", df[df["type"] == "TV Show"].shape[0])
 
     st.subheader("Top 10 Genres")
     top_genres = df["listed_in"].value_counts().head(10)
     st.bar_chart(top_genres)
 
-# Country Page
+# 2. Country Analysis
 elif menu == "Country Analysis":
     st.title("🌍 Country Distribution")
 
-    country_counts = df["country"].value_counts().head(20)
-    st.bar_chart(country_counts)
+    country_count = df["country"].value_counts().head(20)
+    st.bar_chart(country_count)
 
-# Genres Page
+# 3. Genre Breakdown
 elif menu == "Genres":
     st.title("🎭 Genre Breakdown")
 
-    genre_counts = df["listed_in"].value_counts().head(15)
-    plt.figure(figsize=(10,6))
-    sns.barplot(y=genre_counts.index, x=genre_counts.values)
-    st.pyplot(plt)
+    genre_count = df["listed_in"].value_counts().head(15)
 
-# Release Trends
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(y=genre_count.index, x=genre_count.values, ax=ax)
+    ax.set_xlabel("Count")
+    ax.set_ylabel("Genre")
+    st.pyplot(fig)
+
+# 4. Release Trends
 elif menu == "Release Trends":
     st.title("📅 Release Year Trends")
 
-    df_year = df["release_year"].value_counts().sort_index()
-    st.line_chart(df_year)
+    release_years = df["release_year"].value_counts().sort_index()
+    st.line_chart(release_years)
 
-# Footer
-st.markdown("<hr><center>Made by <b>Arya Kshirsagar</b> — Netflix Analysis Dashboard</center>", 
-            unsafe_allow_html=True)
+# ---- Footer ----
+st.markdown(
+    """
+    <br><hr>
+    <p style='text-align:center; font-size:13px; color:gray;'>
+        Built by <b>Arya Kshirsagar</b> — Netflix Analysis Dashboard (AIML)
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
